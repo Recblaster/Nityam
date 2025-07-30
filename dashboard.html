@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARCHON Dashboard | NITYAM INITIATIVE</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div>
+                <h1>NITYAM INITIATIVE</h1>
+                <p class="subtitle">ARCHON Protocol: LIVE</p>
+            </div>
+            <div id="lastUpdated" class="sync-status">
+                <i data-feather="satellite-dish"></i> Syncing...
+            </div>
+        </header>
+
+        <main class="grid-layout">
+            <div class="card card-rank">
+                <div class="card-header">
+                    <i data-feather="award"></i>
+                    <h2>Current Rank</h2>
+                </div>
+                <div class="rank-main">
+                    <p id="rank">RECRUIT</p>
+                    <span id="rankIcon">●</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div id="rankProgress" class="progress-bar"></div>
+                </div>
+                <p class="progress-label"><span id="totalScore">0</span> / <span id="nextRankScore">250</span> XP to Operative</p>
+            </div>
+            
+            <div class="card card-daily-report">
+                <div class="card-header">
+                     <i data-feather="activity"></i>
+                    <h2>Latest Mission Report</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="dailyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card card-history">
+                 <div class="card-header">
+                    <i data-feather="trending-up"></i>
+                    <h2>Weekly Performance</h2>
+                </div>
+                <div class="chart-container">
+                    <canvas id="historyChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card card-hq">
+                 <div class="card-header">
+                    <i data-feather="message-square"></i>
+                    <h2>Message from HQ</h2>
+                </div>
+                <p id="messageFromHq">Awaiting first mission report...</p>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>feather.replace()</script>
+    <script src="main.js"></script>
+</body>
+</html>
