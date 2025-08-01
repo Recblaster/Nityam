@@ -1,5 +1,10 @@
 // This listener ensures that NO code runs until the entire HTML document is fully loaded and ready.
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Helper function to resolve CSS variables
+    function cssVar(name) {
+        return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
     
     let ALL_LOGS = []; // Global variable to store all logs
     feather.replace(); // Initialize feather icons immediately
@@ -123,10 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRank(score) {
         const ranks = {
-            RECRUIT: { threshold: 0, next: 250, color: 'var(--rank-recruit)', icon: '●' },
-            OPERATIVE: { threshold: 250, next: 600, color: 'var(--rank-operative)', icon: '◆' },
-            SPECIALIST: { threshold: 600, next: 1200, color: 'var(--rank-specialist)', icon: '★' },
-            COMMANDER: { threshold: 1200, next: Infinity, color: 'var(--rank-commander)', icon: '✪' }
+            RECRUIT: { threshold: 0, next: 250, color: cssVar('--rank-recruit'), icon: '●' },
+            OPERATIVE: { threshold: 250, next: 600, color: cssVar('--rank-operative'), icon: '◆' },
+            SPECIALIST: { threshold: 600, next: 1200, color: cssVar('--rank-specialist'), icon: '★' },
+            COMMANDER: { threshold: 1200, next: Infinity, color: cssVar('--rank-commander'), icon: '✪' }
         };
 
         let currentRankName = 'RECRUIT';
@@ -174,8 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 labels: ['TITAN', 'ORACLE', 'SAGE', 'Bonus'],
                 datasets: [{
                     data: [log.titan_pts, log.oracle_pts, log.sage_pts, log.bonus_pts],
-                    backgroundColor: ['var(--accent-red)', 'var(--primary)', 'var(--accent-green)', 'var(--accent-orange)'],
-                    borderColor: 'var(--card-background)',
+                    backgroundColor: [
+                        cssVar('--accent-red'),
+                        cssVar('--primary'),
+                        cssVar('--accent-green'),
+                        cssVar('--accent-orange')
+                    ],
+                    borderColor: cssVar('--card-background'),
                     borderWidth: 5,
                     cutout: '70%'
                 }]
@@ -210,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 datasets: [{
                     label: 'Total Daily Score',
                     data: dataPoints,
-                    backgroundColor: 'var(--primary)',
+                    backgroundColor: cssVar('--primary'),
                     borderRadius: 4,
                     barThickness: 15
                 }]
@@ -219,8 +229,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'var(--border)' }, ticks: { color: 'var(--muted-foreground)' } },
-                    x: { grid: { display: false }, ticks: { color: 'var(--muted-foreground)' } }
+                    y: { beginAtZero: true, grid: { color: cssVar('--border') }, ticks: { color: cssVar('--muted-foreground') } },
+                    x: { grid: { display: false }, ticks: { color: cssVar('--muted-foreground') } }
                 },
                 plugins: {
                     legend: { display: false },
