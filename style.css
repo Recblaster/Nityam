@@ -6,8 +6,8 @@
     --muted-foreground: #94a3b8; /* Lighter, more readable muted text */
     --primary: #38bdf8; /* Vibrant sky blue */
     --primary-foreground: #020617;
-    --accent-green: #4ade80;
     --accent-red: #f87171;
+    --accent-green: #4ade80;
     --accent-orange: #fb923c;
     --rank-recruit: #94a3b8;
     --rank-operative: #38bdf8;
@@ -57,7 +57,8 @@ h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.5px; }
     grid-template-rows: auto;
     gap: 1.5rem;
     grid-template-areas:
-        "rank rank daily daily"
+        "rank rank selector selector"
+        "breakdown breakdown daily-report daily-report"
         "history history hq hq";
 }
 
@@ -82,9 +83,12 @@ h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.5px; }
 
 /* Grid Area Assignments */
 .card-rank { grid-area: rank; }
-.card-daily-report { grid-area: daily; }
+.card-daily-selector { grid-area: selector; }
+.card-daily-details { grid-area: breakdown; }
+.card-daily-report { grid-area: daily-report; }
 .card-history { grid-area: history; }
 .card-hq { grid-area: hq; }
+
 
 /* Rank Card Specifics */
 .rank-main { text-align: center; margin: 1rem 0 2rem 0; }
@@ -94,43 +98,72 @@ h1 { font-size: 1.75rem; font-weight: 600; letter-spacing: -0.5px; }
 .progress-bar { height: 100%; background-color: var(--primary); border-radius: 99px; width: 0%; transition: width 0.5s ease-out; }
 .progress-label { text-align: center; margin-top: 0.75rem; font-size: 0.875rem; color: var(--muted-foreground); }
 
-/* Chart Containers */
-.chart-container { position: relative; width: 100%; height: 100%; min-height: 250px; }
-#messageFromHq { font-size: 1.125rem; line-height: 1.6; color: var(--muted-foreground); align-self: center; margin: auto 0; }
-
-/* Feather Icons */
-i.feather { width: 24px; height: 24px; stroke-width: 1.5; }
-
-/* Admin Tool remains the same, but let's ensure buttons are styled well */
-/* Add this to your existing admin styles or just keep them as they are */
-.btn {
-    background-color: var(--primary);
-    color: var(--primary-foreground);
-    font-weight: 600;
-    cursor: pointer;
-    border: none;
-    transition: opacity 0.2s;
-    margin-top: 1rem;
-    padding: 0.75rem 1rem;
-    border-radius: 0.5rem;
-    font-size: 1rem;
-}
-.btn:hover { opacity: 0.9; }
-
-textarea, input {
+/* Date Input Styling */
+.date-input {
     width: 100%;
-    padding: 0.75rem;
+    padding: 0.75rem 1rem;
     background-color: var(--background);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     color: var(--foreground);
     font-family: 'Inter', sans-serif;
     font-size: 1rem;
+    cursor: pointer;
+}
+.date-input:focus {
+    outline: none;
+    border-color: var(--primary);
 }
 
-textarea:focus, input:focus { outline: none; border-color: var(--primary); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+/* Daily Breakdown Points Grid */
+.points-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.point-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: var(--background);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+}
+
+.point-label {
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.point-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary); /* Or specific colors for each module */
+}
+
+.total-daily {
+    grid-column: span 2;
+    background-color: var(--primary); /* Highlight total */
+    color: var(--primary-foreground);
+    justify-content: center;
+    gap: 0.5rem;
+}
+.total-daily .point-label, .total-daily .point-value {
+    color: var(--primary-foreground);
+}
+
+
+/* Chart Containers */
+.chart-container { position: relative; width: 100%; height: 100%; min-height: 250px; }
+.hq-message { font-size: 1.125rem; line-height: 1.6; color: var(--muted-foreground); align-self: center; margin: auto 0; }
+
+/* Feather Icons */
+i.feather { width: 24px; height: 24px; stroke-width: 1.5; }
+
 
 /* Responsive adjustments */
 @media (max-width: 900px) {
@@ -138,7 +171,8 @@ textarea:focus, input:focus { outline: none; border-color: var(--primary); }
         grid-template-columns: 1fr 1fr;
         grid-template-areas:
             "rank rank"
-            "daily daily"
+            "selector selector"
+            "breakdown daily-report"
             "history history"
             "hq hq";
     }
@@ -149,8 +183,12 @@ textarea:focus, input:focus { outline: none; border-color: var(--primary); }
         grid-template-columns: 1fr;
         grid-template-areas:
             "rank"
-            "daily"
+            "selector"
+            "breakdown"
+            "daily-report"
             "history"
             "hq";
     }
+    .points-grid { grid-template-columns: 1fr; }
+    .total-daily { grid-column: span 1; }
 }
