@@ -1,8 +1,9 @@
+let ALL_LOGS = []; // Global variable to store all logs
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Immediately run feather icons replacement
-    feather.replace();
-    
-    // Add a cache-busting parameter to the fetch URL to avoid stale data from browser cache
+    feather.replace(); // Initialize feather icons
+
+    // Fetch data with cache busting
     fetch('data.json?v=' + new Date().getTime())
         .then(response => {
             if (!response.ok) {
@@ -10,7 +11,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             return response.json();
         })
-        .then(data => processData(data))
+        .then(data => {
+            ALL_LOGS = data.logs || []; // Store all logs globally
+
+            if (ALL_LOGS.length === 0) {
+                const lastUpdatedElem = document.getElementById('lastUpdated');
+                lastUpdatedElem.innerHTML = `<i data-feather="clock"></i> No missions logged yet.`;
+                feather.replace();
+                // Initialize date selector with today's date but no data loaded
+                initDateSelector(null);
+                return;
+            }
+
+            // --- Initial Data Processing and Display ---
+            processOverallData();
+            
+            // --- Initialize Date Selector ---
+            initDateSelector(ALL_LOGS);
+
+            // Display the latest day's data by default
+            displaySelectedDayData(ALL_LOGS[ALL_LOGS.length - 1]);
+            
+            // Re-run Feather Icons after dynamic content is loaded
+            feather.replace();
+        })
         .catch(error => {
             console.error('Error fetching or parsing data:', error);
             document.getElementById('rank').innerText = "Error";
@@ -20,43 +44,94 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 });
 
-function processData(data) {
-    const logs = data.logs || [];
-    if (logs.length === 0) {
-        const lastUpdatedElem = document.getElementById('lastUpdated');
-        lastUpdatedElem.innerHTML = `<i data-feather="clock"></i> No missions logged yet.`;
-        feather.replace();
-        return;
-    }
-
-    // --- Calculations ---
+function processOverallData() {
     let totalScore = 0;
-    logs.forEach(log => {
+    ALL_LOGS.forEach(log => {
         totalScore += (log.titan_pts + log.oracle_pts + log.sage_pts + log.bonus_pts);
     });
 
-    const rank = getRank(totalScore);
-
-    // --- Get latest data ---
-    const latestLog = logs[logs.length - 1];
-    const lastUpdatedDate = new Date(latestLog.date);
-    
-    // --- Update DOM ---
+    const rank = getRank(totalScore); // This function also updates progress bar
     document.getElementById('rank').innerText = rank;
     document.getElementById('totalScore').innerText = totalScore;
-    
+
+    // Update Last Synced timestamp based on the very last log entry
+    const latestLog = ALL_LOGS[ALL_LOGS.length - 1];
+    const lastUpdatedDate = new Date(latestLog.date);
     const lastUpdatedElem = document.getElementById('lastUpdated');
     lastUpdatedElem.innerHTML = `<i data-feather="check-circle"></i> Last Synced: ${lastUpdatedDate.toLocaleString()}`;
-    
-    document.getElementById('messageFromHq').innerText = latestLog.notes;
-
-    // --- Render Charts ---
-    renderDailyChart(latestLog);
-    renderHistoryChart(logs);
-    
-    // Re-run Feather Icons after dynamic content is loaded
     feather.replace();
+
+    // Render history chart (always based on latest 7 days)
+    renderHistoryChart(ALL_LOGS);
 }
+
+
+function initDateSelector(logs) {
+    const dateSelector = document.getElementById('dateSelector');
+    if (!logs || logs.length === 0) {
+        // Set default to today if no logs, but keep it empty conceptually
+        const today = new Date();
+        dateSelector.value = today.toISOString().split('T')[0];
+        return;
+    }
+
+    const firstLogDate = new Date(logs[0].date);
+    const lastLogDate = new Date(logs[logs.length - 1].date);
+
+    // Set min/max dates for the picker
+    dateSelector.min = firstLogDate.toISOString().split('T')[0];
+    dateSelector.max = lastLogDate.toISOString().split('T')[0];
+    
+    // Set initial value to the latest log date
+    dateSelector.value = lastLogDate.toISOString().split('T')[0];
+
+    // Add event listener for date changes
+    dateSelector.addEventListener('change', (event) => {
+        const selectedDateString = event.target.value; // YYYY-MM-DD
+        const selectedLog = ALL_LOGS.find(log => {
+            return new Date(log.date).toISOString().split('T')[0] === selectedDateString;
+        });
+
+        if (selectedLog) {
+            displaySelectedDayData(selectedLog);
+        } else {
+            // Handle case where no log exists for the selected date
+            clearDailyDetails();
+            document.getElementById('selectedDateDisplay').innerText = new Date(selectedDateString).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+            document.getElementById('messageFromHq').innerText = "No mission report found for this day.";
+            // Clear daily chart
+            if (window.dailyChartInstance) window.dailyChartInstance.destroy();
+            document.getElementById('dailyChart').getContext('2d').clearRect(0, 0, document.getElementById('dailyChart').width, document.getElementById('dailyChart').height);
+        }
+        feather.replace(); // Re-render icons if message changes
+    });
+}
+
+// Function to clear daily details if no data for selected day
+function clearDailyDetails() {
+    document.getElementById('dailyTitanPts').innerText = '0';
+    document.getElementById('dailyOraclePts').innerText = '0';
+    document.getElementById('dailySagePts').innerText = '0';
+    document.getElementById('dailyBonusPts').innerText = '0';
+    document.getElementById('dailyTotalPts').innerText = '0';
+}
+
+
+function displaySelectedDayData(log) {
+    document.getElementById('selectedDateDisplay').innerText = new Date(log.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+    document.getElementById('hqMessageDate').innerText = new Date(log.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+
+    document.getElementById('dailyTitanPts').innerText = log.titan_pts;
+    document.getElementById('dailyOraclePts').innerText = log.oracle_pts;
+    document.getElementById('dailySagePts').innerText = log.sage_pts;
+    document.getElementById('dailyBonusPts').innerText = log.bonus_pts;
+    document.getElementById('dailyTotalPts').innerText = log.titan_pts + log.oracle_pts + log.sage_pts + log.bonus_pts;
+    document.getElementById('messageFromHq').innerText = log.notes;
+
+    // Render daily chart for the selected log
+    renderDailyChart(log);
+}
+
 
 function getRank(score) {
     const ranks = {
@@ -106,9 +181,16 @@ function getRank(score) {
     return currentRankName;
 }
 
+// Store chart instances globally to destroy and re-create them
+let dailyChartInstance = null;
+let historyChartInstance = null;
+
 function renderDailyChart(log) {
     const ctx = document.getElementById('dailyChart').getContext('2d');
-    new Chart(ctx, {
+    if (dailyChartInstance) {
+        dailyChartInstance.destroy();
+    }
+    dailyChartInstance = new Chart(ctx, {
         type: 'doughnut',
         data: {
             labels: ['TITAN', 'ORACLE', 'SAGE', 'Bonus'],
@@ -138,24 +220,25 @@ function renderDailyChart(log) {
 }
 
 function renderHistoryChart(logs) {
-    // Ensure we have at least 7 days of data for context, padding with zeros if necessary
-    let labels = [];
-    let dataPoints = [];
+    const labels = [];
+    const dataPoints = [];
     
-    const last7Logs = logs.slice(-7);
+    // Get the last 7 logs, ensuring we have full days for labels even if data is missing
+    const numLogs = logs.length;
+    const startIndex = Math.max(0, numLogs - 7);
+    const last7Logs = logs.slice(startIndex);
     
-    for (let i = 0; i < 7; i++) {
-        if (i < last7Logs.length) {
-            const log = last7Logs[i];
-            labels.push(new Date(log.date).toLocaleDateString('en-US', { weekday: 'short' }));
-            dataPoints.push(log.titan_pts + log.oracle_pts + log.sage_pts + log.bonus_pts);
-        } else {
-            // This part can be adjusted if you prefer not to show empty slots
-        }
+    for (let i = 0; i < last7Logs.length; i++) {
+        const log = last7Logs[i];
+        labels.push(new Date(log.date).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' }));
+        dataPoints.push(log.titan_pts + log.oracle_pts + log.sage_pts + log.bonus_pts);
     }
     
     const ctx = document.getElementById('historyChart').getContext('2d');
-    new Chart(ctx, {
+    if (historyChartInstance) {
+        historyChartInstance.destroy();
+    }
+    historyChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -186,7 +269,6 @@ function renderHistoryChart(logs) {
                  tooltip: {
                     callbacks: {
                         title: function(context) {
-                            // Custom tooltip title if needed
                             return `Report: ${context[0].label}`;
                         },
                         label: function(context) {
