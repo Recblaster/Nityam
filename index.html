@@ -18,7 +18,7 @@
                 <p class="subtitle">ARCHON Protocol: LIVE</p>
             </div>
             <div id="lastUpdated" class="sync-status">
-                <i data-feather="satellite-dish"></i> Syncing...
+                <i data-feather="loader"></i> Syncing...
             </div>
         </header>
 
@@ -38,10 +38,42 @@
                 <p class="progress-label"><span id="totalScore">0</span> / <span id="nextRankScore">250</span> XP to Operative</p>
             </div>
             
+            <div class="card card-daily-selector">
+                <div class="card-header">
+                    <i data-feather="calendar"></i>
+                    <h2>Select Mission Day</h2>
+                </div>
+                <input type="date" id="dateSelector" class="date-input">
+            </div>
+
+            <div class="card card-daily-details">
+                <div class="card-header">
+                    <i data-feather="list"></i>
+                    <h2>Daily Mission Breakdown (<span id="selectedDateDisplay">Today</span>)</h2>
+                </div>
+                <div class="points-grid">
+                    <div class="point-item">
+                        <span class="point-label">TITAN:</span> <span id="dailyTitanPts" class="point-value">0</span>
+                    </div>
+                    <div class="point-item">
+                        <span class="point-label">ORACLE:</span> <span id="dailyOraclePts" class="point-value">0</span>
+                    </div>
+                    <div class="point-item">
+                        <span class="point-label">SAGE:</span> <span id="dailySagePts" class="point-value">0</span>
+                    </div>
+                    <div class="point-item">
+                        <span class="point-label">BONUS:</span> <span id="dailyBonusPts" class="point-value">0</span>
+                    </div>
+                    <div class="point-item total-daily">
+                        <span class="point-label">DAILY TOTAL:</span> <span id="dailyTotalPts" class="point-value">0</span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="card card-daily-report">
                 <div class="card-header">
                      <i data-feather="activity"></i>
-                    <h2>Latest Mission Report</h2>
+                    <h2>Selected Day's Report</h2>
                 </div>
                 <div class="chart-container">
                     <canvas id="dailyChart"></canvas>
@@ -61,9 +93,9 @@
             <div class="card card-hq">
                  <div class="card-header">
                     <i data-feather="message-square"></i>
-                    <h2>Message from HQ</h2>
+                    <h2>Message from HQ (<span id="hqMessageDate">Latest</span>)</h2>
                 </div>
-                <p id="messageFromHq">Awaiting first mission report...</p>
+                <p id="messageFromHq" class="hq-message">Awaiting first mission report...</p>
             </div>
         </main>
     </div>
